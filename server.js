@@ -12,16 +12,24 @@ const JwtStrategy = passportJWT.Strategy
 
 const { User } = require("./models.js")
 
+
+//in place of database for now
 var users = [
   {
     id: 1,
-    name: 'jonathanmh',
-    password: '%2yx4'
+    name: 'jonathan Hahn',
+    username: 'jonathanmh',
+    password: '%2yx4',
+    email: 'jon@gmail.com',
+    phone: '1234567890'
   },
   {
     id: 2,
-    name: 'test',
-    password: 'test'
+    name: 'test test',
+    username: 'test',
+    password: 'test',
+    email: 'test@test.com',
+    phone: '1111111111'
   }
 ]
 
@@ -69,18 +77,19 @@ app.get("/secretDebug",
 })
 
 app.post("/login", function(req, res) {
-  if(req.body.name && req.body.password){
-    var name = req.body.name
+  if(req.body.username && req.body.password){
+    var username = req.body.username
     var password = req.body.password
   }
+
   // usually this would be a database call:
-  var user = users[_.findIndex(users, {name: name})]
+  var user = users[_.findIndex(users, {username: username})]
 
   if( ! user ){
     res.status(401).json({message:"no such user found"})
   }
 
-  if(user.password === req.body.password) {
+  if(user.password === password) {
     // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
     var payload = {id: user.id}
     var token = jwt.sign(payload, jwtOptions.secretOrKey)
@@ -91,18 +100,24 @@ app.post("/login", function(req, res) {
 })
 
 app.post("/register", function(req, res) {
-  const data = req.body
-  console.log(data)
-  if (data.name && data.password) {
-    var name = data.name,
-          password = data.password
+  if (req.body.name && req.body.username && req.body.password && req.body.email && req.body.phone) {
+    var name = req.body.name,
+        username = req.body.username,
+        password = req.body.password,
+        email = req.body.email,
+        phone = req.body.phone
   }
-  var user = users[_.findIndex(users, {name: name})]
+  
+  var user = users[_.findIndex(users, {username: username})]
 
   if (!user) {
-    users.push({id: users.length, name: data.name, password: data.password})
+    users.push({id: users.length + 1, 
+                name: name,
+                username: username,
+                password: password,
+                email: email,
+                phone: phone})
     res.status(201)
-    console.log(users)
   } else {
     res.status(500).json({message:"username already in use"})
   }
@@ -113,30 +128,3 @@ var port = process.env.PORT || 3000;
 app.listen(port, function() {
   console.log("Listening on port " + port)
 })
-
-// Sign In
-// Send password and username
-// Return JWeb Token
-// Set token to expire in X amount of time
-// https://jwt.io/introduction/
-
-// Profile
-// Load Profile 
-// Update
-
-// Register account Call
-// Contains
-// Username
-// Password 
-// Date account created
-// First Name
-// Last Name
-// Email (required?)
-// Phone number (required?)
-// Returns yay or nay
-
-// Properties Calls
-// All properties to load into the map Call
-// All my favorite properties Call
-
-// All Current Bids

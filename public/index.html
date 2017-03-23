@@ -5,23 +5,36 @@
         <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
     </head>
     <script>
+        //this is an ugly front end to demonstrate what the server can currently do
+        //if you are currently logged in and refresh the page the jwt will still exist even though the message won't say so
         var bidApp = angular.module('bidApp', [])
         bidApp.controller('login', ['$scope', '$http', function ($scope, $http) {
-            $scope.loginName = ""
+
+            //login
+            $scope.loginUsername = ""
             $scope.loginPassword = ""
-            $scope.regName = ""
+
+            //register
+            $scope.regUsername = ""
             $scope.regPassword = ""
+            $scope.name = ""
+            $scope.email = ""
+            $scope.phone = ""
+
+            //"logged in"/"logged out"
             $scope.msg = ""
 
             $scope.login = function() {
-                if ($scope.loginName && $scope.loginPassword) {
+                if ($scope.loginUsername && $scope.loginPassword) {
                     $http({
                         method: 'POST',
                         url: '/login',
-                        data: {name: $scope.loginName,
+                        data: {username: $scope.loginUsername,
                                password: $scope.loginPassword}
                     }).then(function success(res) {
                         const data = res.data
+
+                        //if user received jwt
                         if (data.token) {
                             $scope.msg = "logged in"
                             localStorage.setItem("token", data.token)
@@ -35,12 +48,15 @@
             }
 
             $scope.register = function() {
-                if ($scope.regName && $scope.regPassword) {
+                if ($scope.regUsername && $scope.regPassword) {
                     $http({
                         method: 'POST',
                         url: '/register',
-                        data: {name: $scope.regName,
-                               password: $scope.regPassword}
+                        data: {name: $scope.name,
+                               username: $scope.regUsername,
+                               password: $scope.regPassword,
+                               email: $scope.email,
+                               phone: $scope.phone}
                     }).then(function success(res) {
                         console.log(res)
                     }), function err(res) {
@@ -49,6 +65,7 @@
                 }
             }
 
+            //prints message in console if you are currently logged in (in other words if you have a valid jwt)
             $scope.getSecret = function() {
                 $http({
                     method: 'GET',
@@ -61,21 +78,33 @@
                     console.log(res)
                 }
             }
+            //deletes jwt from local storage
+            $scope.logout = function() {
+                localStorage.removeItem("token")
+                $scope.msg = "logged out"
+            }
         }])
     </script>
     <body ng-controller="login">
+
     <label>Register</label>
     <form ng-submit="register()">
-      <input type="text" ng-model="regName" placeholder="username">
-      <input type="text" ng-model="regPassword" placeholder="password">
-      <input type="submit" value="register">
+        <input type="text" ng-model="name" placeholder="full name">
+        <input type="text" ng-model="regUsername" placeholder="username">
+        <input type="text" ng-model="regPassword" placeholder="password">
+        <input type="text" ng-model="email" placeholder="email">
+        <input type="text" ng-model="phone" placeholder="phone number">
+        <input type="submit" value="register">
     </form>
+
     <label>Login</label>
     <form ng-submit="login()">
-      <input type="text" ng-model="loginName" placeholder="username">
-      <input type="text" ng-model="loginPassword" placeholder="password">
-      <input type="submit" value="login">
+        <input type="text" ng-model="loginUsername" placeholder="username">
+        <input type="text" ng-model="loginPassword" placeholder="password">
+        <input type="submit" value="login">
     </form>
+
     <button ng-click="getSecret()">Get Secret</button>
-    <div>{{message}}</div>
+    <button ng-click="logout()">Log Out</button>
+    <div>{{msg}}</div>
     </body>
